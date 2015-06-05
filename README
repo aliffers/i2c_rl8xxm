@@ -1,0 +1,57 @@
+Small and simple library for I2C-RL812M, I2C-RL812MA, I2C-RL824M, I2C-RL824MA
+-----------------------------------------------------------------------------
+
+The only differences between the various models of I2C relay boards from ereshop.com, is the addressing (M vs. MA)
+and voltage (812 = 12V and 824 = 24V).
+
+The functions don't do any checking regarding whether or not the addressing is right, or anything else.  They're
+written for speed and minimal code size.
+
+All functions that switch relays on have a built in 10ms delay to allow the mechanics of the relay to flip.  Similarly
+for switching off there's a 5ms delay.  For the toggle functions, rather than wasting time looking up whether it is an
+on or off action, the delay is simply 10ms.
+
+To use the library, include the library and Wire.h:
+#include <Wire.h>
+#include <I2C_RL8xxM.h>
+
+You will need to manually activate I2C in your Arduino sketch.  Rather than enabling it in the constructor of this
+class, and disabling in the destructor, I left it up the individual user to enable/disable I2C as they see fit.
+There's a chance that these relay boards aren't the only I2C devices on the bus.
+
+To create an instance of the class, use the constructor and pass the address of the board as the only parameter:
+I2C_RL8xxM rb (0x20);
+
+Example Usage
+-------------
+
+rb.Switch (1, true); // Switch relay 1 on (true = on, false = off)
+rb.Switch (2, false); // Switch relay 2 off
+rb.Toggle (3); // Toggle relay 3, to the opposite of whatever it is now
+rb.Toggle (0); // Toggle all relays to the opposite of whatever they are now
+
+Functions
+---------
+
+For all functions specifying a relay number, the values are 1 through to 8.
+
+1. Main functions
+
+bool IsOn (int relay); // Returns true if "relay" is on, otherwise false.
+void Switch (int relay, bool on); // Switches "relay" on if "on" is true, otherwise off.
+void Toggle (int relay); // Toggles "relay" to the opposite of the current value. If "relay" is zero, all relays are toggled.
+void All (bool on); // Switch all relays on if "on" is true, otherwise off.
+
+2. Shortcut functions
+void On (int relay); // Switches "relay" on.
+void Off (int relay); // Switches "relay" off.
+void AllOn (); // All relays on.
+void AllOff (); // All relays off.
+void AllToggle (); // Toggle all relays.
+
+3. Internal functions
+
+These functions are used internally by the class, but I've made them publicly accessible just for fun.
+
+byte ReadValue (); // Returns the current value of PCF8574, which handles the I2C communications.
+void WriteValue (byte value); // Writes "value" to the PCF8574.
